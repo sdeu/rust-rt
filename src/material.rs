@@ -1,20 +1,17 @@
-use ray::Ray;
-use intersection::Intersection;
-use na::Vector3;
+use super::intersection::Intersection;
+use super::math::Vec3;
+use super::ray::Ray;
 
-mod material {
-    trait Material {
-        fn scatter(&self, ray: Ray, intersection: Intersection) -> Ray;
+pub trait Material {
+    fn scatter(&self, ray: Ray, intersection: Intersection) -> Ray;
+}
+
+pub struct Lambert {
+    pub color: Vec3,
+}
+
+impl Material for Lambert {
+    fn scatter(&self, ray: Ray, intersection: Intersection) -> Ray {
+        return ray;
     }
-
-    pub struct Lambert {
-        color: Vector3
-    }
-
-    impl Material for Lambert {
-        fn scatter(ray: Ray, intersection: Intersection) {
-            return ray;
-        }
-    }
-
 }

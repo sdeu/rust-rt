@@ -1,23 +1,36 @@
 use super::intersection::Intersection;
+use super::material::Material;
+use super::math::Matrix4;
 use super::ray::Ray;
-use na::{Affine3, Vector3};
-use std::f64;
+use super::shape::Shape;
+use na::Vector3;
+use std::{f64, rc::Rc};
 
 pub struct Sphere {
     pub radius: f64,
-    pub object_to_world: Affine3<f64>,
-    pub world_to_object: Affine3<f64>,
+    pub object_to_world: Matrix4,
+    pub world_to_object: Matrix4,
+    pub material: Rc<dyn Material>,
 }
 
 impl Sphere {
-    fn new(radius: f64, object_to_world: Affine3<f64>) -> Sphere {
-        Sphere {
-            radius: radius,
-            object_to_world: object_to_world,
-            world_to_object: object_to_world.inverse(),
+    pub fn new(radius: f64, object_to_world: Matrix4, material: Rc<dyn Material>) -> Sphere {
+        let inv = object_to_world.try_inverse();
+        match inv {
+            Some(i) => {
+                return Sphere {
+                    radius: radius,
+                    object_to_world: object_to_world,
+                    world_to_object: i,
+                    material: material,
+                }
+            }
+            None => panic!(),
         }
     }
+}
 
+impl Shape for Sphere {
     fn hit(&self, ray: Ray) -> Option<Intersection> {
         let r = ray.transform(self.world_to_object);
         let B = 2. * r.direction.dot(&r.origin.coords);
@@ -62,17 +75,23 @@ impl Sphere {
             point: self.object_to_world.transform_point(&intersection_point),
             normal: n,
             t: t,
+            material: self.material.clone(),
         });
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{Ray, Sphere};
-    use na::{Affine3, Point3, Vector3};
+    use super::super::material::Lambert;
+    use super::{Ray, Shape, Sphere};
+    use na::{Matrix4, Point3, Vector3};
+    use std::rc::Rc;
     #[test]
     fn test_ray_intersection() {
-        let s = Sphere::new(1., Affine3::identity());
+        let l = Rc::new(Lambert {
+            color: Vector3::new(1., 0., 0.),
+        });
+        let s = Sphere::new(1., Matrix4::identity(), l);
         let ray = Ray {
             origin: Point3::new(0., 0., 3.),
             direction: Vector3::new(0., 0., -1.),
