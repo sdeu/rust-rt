@@ -31,7 +31,7 @@ impl Sphere {
 }
 
 impl Shape for Sphere {
-    fn hit(&self, ray: Ray) -> Option<Intersection> {
+    fn hit(&self, ray: &Ray) -> Option<Intersection> {
         let r = ray.transform(self.world_to_object);
         let B = 2. * r.direction.dot(&r.origin.coords);
         let C = r.origin.coords.dot(&r.origin.coords) - (self.radius * self.radius);
@@ -96,7 +96,7 @@ mod tests {
             origin: Point3::new(0., 0., 3.),
             direction: Vector3::new(0., 0., -1.),
         };
-        let i = s.hit(ray);
+        let i = s.hit(&ray);
         assert! {i.is_some()};
         let intersection = i.unwrap();
         assert_eq! {intersection.t, 2.};
