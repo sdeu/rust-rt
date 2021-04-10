@@ -34,6 +34,6 @@ impl Film {
     }
 
     pub fn save(&self) {
-        self.image.save(self.filename.as_path());
+        self.image.save(self.filename.as_path()).unwrap();
     }
 }

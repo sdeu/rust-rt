@@ -33,44 +33,35 @@ impl Sphere {
 impl Shape for Sphere {
     fn hit(&self, ray: &Ray) -> Option<Intersection> {
         let r = ray.transform(self.world_to_object);
-        let B = 2. * r.direction.dot(&r.origin.coords);
-        let C = r.origin.coords.dot(&r.origin.coords) - (self.radius * self.radius);
-        let d = B * B - 4. * C;
+        let b = 2. * r.direction.dot(&r.origin.coords);
+        let c = r.origin.coords.dot(&r.origin.coords) - (self.radius * self.radius);
+        let d = b * b - 4. * c;
         if d < 0. {
             return None;
         }
         let root_d = d.sqrt();
         let q;
 
-        if B < 0. {
-            q = -0.5 * (B - root_d);
+        if b < 0. {
+            q = -0.5 * (b - root_d);
         } else {
-            q = -0.5 * (B + root_d);
+            q = -0.5 * (b + root_d);
         }
 
         let t0 = q;
-        let t1 = C / q;
+        let t1 = c / q;
 
         if t1 < 0. && t0 < 0. {
             return None;
         }
 
-        let mut t = t0.min(t1);
-
-        if t0 < 0. && t1 > 0. {
-            t = t1;
-        }
-
-        if t1 < 0. && t0 > 0. {
-            t = t0;
-        }
-
+        let t = t0.min(t1);
         let intersection_point = r.point_at(t);
         let n = Vector3::new(
             intersection_point.x,
             intersection_point.y,
             intersection_point.z,
-        );
+        ).normalize();
         return Some(Intersection {
             point: self.object_to_world.transform_point(&intersection_point),
             normal: n,
