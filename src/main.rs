@@ -16,7 +16,7 @@ fn main() {
     let objects = vec![
         Box::new(sphere::Sphere::new(
             1.,
-            na::Matrix4::new_translation(&na::Vector3::new(1., -0.5, -5.)),
+            na::Matrix4::new_translation(&na::Vector3::new(0., 0., 0.)),
             Rc::new(material::Lambert {
                 color: na::Vector3::new(1., 0., 0.),
             }),
@@ -40,9 +40,12 @@ fn main() {
     let scene = scene::Scene { shapes: objects };
     let width: u32 = 640;
     let height: u32 = 480;
-    let samples = 1000;
-    let film = film::Film::new(width, height, samples, Path::new("/tmp/image.png").to_path_buf());
-    let camera = camera::Camera::new(width, height);
+    let samples = 100;
+    let film = film::Film::new(width, height, samples, Path::new("image.png").to_path_buf());
+    let eye = na::Point3::new(0f32, 0f32, 5f32);
+    let target = na::Point3::new(0f32, 0f32, 0f32);
+    let view = na::Isometry3::look_at_rh(&eye, &target, &na::Vector3::y());
+    let camera = camera::Camera::new(view.to_matrix(), 3.14 / 2.0, &film);
     let mut renderer = renderer::Renderer{film: film, camera: camera, scene: scene};
     renderer.render();
 

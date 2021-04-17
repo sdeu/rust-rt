@@ -1,6 +1,6 @@
 use super::math::Vec3;
 use image::{Rgb, RgbImage};
-use std::f64;
+use std::f32;
 use std::path::PathBuf;
 
 pub struct Film {
@@ -8,7 +8,7 @@ pub struct Film {
     pub width: u32,
     pub height: u32,
     pub samples: u32,
-    lambda: f64,
+    lambda: f32,
     image: RgbImage,
 }
 

@@ -2,7 +2,7 @@ use super::intersection::Intersection;
 use super::math::Vec3;
 use super::ray::Ray;
 use rand::distributions::{Distribution, Uniform};
-use std::f64::consts::PI;
+use std::f32::consts::PI;
 
 pub trait Material {
     fn scatter(&self, ray: &Ray, intersection: &Intersection) -> Option<Ray>;
@@ -11,8 +11,8 @@ pub trait Material {
 
 fn random_unit_vector() -> Vec3 {
     let mut rng = rand::thread_rng();
-    let a : f64 = Uniform::from(0.0..PI*2.).sample(&mut rng);
-    let z : f64 = Uniform::from(-1.0..1.0).sample(&mut rng);
+    let a : f32 = Uniform::from(0.0..PI*2.).sample(&mut rng);
+    let z : f32 = Uniform::from(-1.0..1.0).sample(&mut rng);
     let r = (1.0 - z * z).sqrt();
     na::Vector3::new(r * a.cos(), r * a.sin(), z).normalize()
 }

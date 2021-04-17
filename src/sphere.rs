@@ -4,17 +4,17 @@ use super::math::Matrix4;
 use super::ray::Ray;
 use super::shape::Shape;
 use na::Vector3;
-use std::{f64, rc::Rc};
+use std::{f32, rc::Rc};
 
 pub struct Sphere {
-    pub radius: f64,
+    pub radius: f32,
     pub object_to_world: Matrix4,
     pub world_to_object: Matrix4,
     pub material: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(radius: f64, object_to_world: Matrix4, material: Rc<dyn Material>) -> Sphere {
+    pub fn new(radius: f32, object_to_world: Matrix4, material: Rc<dyn Material>) -> Sphere {
         let inv = object_to_world.try_inverse();
         match inv {
             Some(i) => {

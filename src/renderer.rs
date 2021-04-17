@@ -5,7 +5,7 @@ use super::ray::Ray;
 use super::scene::Scene;
 use super::intersection::Intersection;
 use rand::Rng;
-use std::f64;
+use std::f32;
 
 pub struct Renderer {
     pub film: Film,
@@ -26,17 +26,17 @@ impl Renderer {
                 let mut sample = 0;
                 let mut color = na::Vector3::new(0., 0., 0.);
                 while sample < self.film.samples {
-                    let u: f64 = (i as f64 + rng.gen::<f64>()) / (self.film.width as f64 - 1.);
-                    let v: f64 = (j as f64 + rng.gen::<f64>()) / (self.film.height as f64 - 1.);
+                    let u: f32 = i as f32 + rng.gen::<f32>();
+                    let v: f32 = j as f32 + rng.gen::<f32>();
                     let ray = self.camera.ray(u, v);
                     let c = self.color(&ray);
                     color += c;
                     sample += 1;
                 }
-                self.film.set_pixel(i, j, color / self.film.samples as f64);
+                self.film.set_pixel(i, j, color / self.film.samples as f32);
                 i += 1;
             }
-            total += 100.0 / (self.film.height as f64);
+            total += 100.0 / (self.film.height as f32);
             bar.reach_percent(total as i32);
             j += 1;
         }
@@ -52,7 +52,7 @@ impl Renderer {
         if depth < 0 {
             return na::Vector3::new(0., 0., 0.);
         }
-        let mut min_t = f64::MAX;
+        let mut min_t = f32::MAX;
         let mut min_hit: Option<Intersection> = None;
         for shape in &self.scene.shapes {
             let i = shape.hit(ray);
