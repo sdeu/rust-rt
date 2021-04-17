@@ -1,5 +1,5 @@
 use super::math::Matrix4;
-use super::ray::Ray;
+use pa::query::Ray;
 use super::film::Film;
 use std::f32;
 
@@ -39,7 +39,7 @@ impl Camera {
         let far_view_point = self.perspective.unproject_point(&far_ndc_point);
         Ray {
             origin: self.camera_to_world.transform_point(&na::Point3::new(0f32, 0f32, 0f32)),
-            direction: far_view_point.coords.normalize(),
+            dir: far_view_point.coords.normalize(),
         }
     }
 }
@@ -61,6 +61,6 @@ mod tests {
         let ray = camera.ray(50., 50.);
 
         assert_eq! {ray.origin, na::Point3::new(0., 0., 0.)};
-        assert_eq! {ray.direction, na::Vector3::new(0., 0., -1.)};
+        assert_eq! {ray.dir, na::Vector3::new(0., 0., -1.)};
     }
 }

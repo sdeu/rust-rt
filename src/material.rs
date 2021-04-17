@@ -1,11 +1,11 @@
-use super::intersection::Intersection;
+use pa::query::RayIntersection;
 use super::math::Vec3;
-use super::ray::Ray;
+use pa::query::Ray;
 use rand::distributions::{Distribution, Uniform};
 use std::f32::consts::PI;
 
 pub trait Material {
-    fn scatter(&self, ray: &Ray, intersection: &Intersection) -> Option<Ray>;
+    fn scatter(&self, ray: &Ray, intersection: &RayIntersection) -> Option<Ray>;
     fn color(&self) -> Vec3;
 }
 
@@ -17,10 +17,10 @@ fn random_unit_vector() -> Vec3 {
     na::Vector3::new(r * a.cos(), r * a.sin(), z).normalize()
 }
 
-fn reflect(ray: &Ray, intersection: &Intersection) -> Ray {
-    let r_n = ray.direction.normalize();
+fn reflect(ray: &Ray, intersection: &RayIntersection) -> Ray {
+    let r_n = ray.dir.normalize();
     let r = r_n - ((2.0 * intersection.normal.dot(&r_n)) * intersection.normal);
-    Ray{origin: intersection.point, direction: r.normalize()}
+    Ray{origin: ray.point_at(intersection.toi), dir: r.normalize()}
 }
 
 fn near_zero(v: Vec3) -> bool {
@@ -33,12 +33,12 @@ pub struct Lambert {
 }
 
 impl Material for Lambert {
-    fn scatter(&self, _ray: &Ray, intersection: &Intersection) -> Option<Ray> {
+    fn scatter(&self, ray: &Ray, intersection: &RayIntersection) -> Option<Ray> {
         let mut r = intersection.normal + random_unit_vector();
         if near_zero(r){
             r = intersection.normal;
         }
-        Some(Ray{origin: intersection.point + (intersection.normal * 0.001), direction: r.normalize()})
+        Some(Ray{origin: ray.point_at(intersection.toi) + (intersection.normal * 0.001), dir: r.normalize()})
     }
 
     fn color(&self) -> Vec3 {
@@ -51,9 +51,9 @@ pub struct Metal {
 }
 
 impl Material for Metal {
-    fn scatter(&self, ray: &Ray, intersection: &Intersection) -> Option<Ray> {
+    fn scatter(&self, ray: &Ray, intersection: &RayIntersection) -> Option<Ray> {
         let r = reflect(ray, intersection);
-        if r.direction.dot(&intersection.normal) > 0.0 {
+        if r.dir.dot(&intersection.normal) > 0.0 {
             return Some(r);
         }
         None
