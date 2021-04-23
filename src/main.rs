@@ -39,7 +39,7 @@ fn main() {
     let scene = scene::Scene { shapes: objects };
     let width: u32 = 640;
     let height: u32 = 480;
-    let samples = 1000;
+    let samples = 10;
     let film = film::Film::new(width, height, samples, Path::new("image.png").to_path_buf());
     let eye = na::Point3::new(0f32, 0f32, 5f32);
     let target = na::Point3::new(0f32, 0f32, 0f32);

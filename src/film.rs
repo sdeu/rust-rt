@@ -1,6 +1,4 @@
-use super::math::Vec3;
-use image::{Rgb, RgbImage};
-use std::f32;
+use image::{RgbImage, GenericImage};
 use std::path::PathBuf;
 
 pub struct Film {
@@ -8,7 +6,6 @@ pub struct Film {
     pub width: u32,
     pub height: u32,
     pub samples: u32,
-    lambda: f32,
     image: RgbImage,
 }
 
@@ -19,18 +16,13 @@ impl Film {
             width: width,
             height: height,
             samples: samples,
-            lambda: 2.2,
             image: RgbImage::new(width, height),
         }
     }
 
-    pub fn set_pixel(&mut self, u: u32, v: u32, color: Vec3) {
-        let c = Rgb([
-            (color.x.powf(self.lambda) * 255.) as u8,
-            (color.y.powf(self.lambda) * 255.) as u8,
-            (color.z.powf(self.lambda) * 255.) as u8,
-        ]);
-        self.image.put_pixel(u, v, c);
+    pub fn set_line(&mut self, line: &RgbImage, y: u32)
+    {
+        self.image.copy_from(line, 0, y).unwrap();
     }
 
     pub fn save(&self) {
