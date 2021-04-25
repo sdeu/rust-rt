@@ -1,4 +1,5 @@
 use super::shape::Shape;
+use std::sync::Arc;
 pub struct Scene {
-    pub shapes: Vec<Box<dyn Shape>>,
+    pub shapes: Vec<Arc<dyn Shape>>,
 }

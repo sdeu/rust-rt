@@ -8,39 +8,59 @@ use super::scene::Scene;
 use rand::Rng;
 use std::f32;
 use image::{Rgb, RgbImage};
+use std::sync::Arc;
+
+extern crate crossbeam;
+use crossbeam_channel::unbounded;
 
 pub struct Renderer {
     pub film: Film,
-    pub camera: Camera,
-    pub scene: Scene,
+    pub camera: Arc<Camera>,
+    pub scene: Arc<Scene>,
 }
 
 impl Renderer {
     pub fn render(&mut self) {
-        let mut total = 0.;
-        let mut bar = progress::Bar::new();
-        bar.set_job_title("Rendering...");
-        for j in 0..self.film.height {
-            let line = render_scanline(j, self.film.width, self.film.samples, 2.2, &self.scene, &self.camera);
-            self.film.set_line(&line, j);
-            total += 100.0 / (self.film.height as f32);
-            bar.reach_percent(total as i32);
-        }
+
+        let (s, r) = unbounded();
+        crossbeam::scope(|scope|{
+            for j in 0..self.film.height {
+                let sender = s.clone();
+                let w = self.film.width;
+                let samples = self.film.samples;
+                let scene = self.scene.clone();
+                let camera = self.camera.clone();
+                scope.spawn(move|_|{
+                    let line = render_scanline(j, w, samples, 2.2, scene.clone(), camera.clone());
+                    sender.send((j, line)).unwrap();
+                });
+            }
+            drop(s);
+            for (y, line) in r.iter() {
+                self.film.set_line(&line, y);
+            };
+        }).unwrap();
+        // for j in 0..self.film.height {
+        //     let line = render_scanline(j, self.film.width, self.film.samples, 2.2, &self.scene, &self.camera);
+        //     self.film.set_line(&line, j);
+        //     total += 100.0 / (self.film.height as f32);
+        //     bar.reach_percent(total as i32);
+        // }
         self.film.save();
     }
 }
 
-    fn color(ray: &Ray, scene: &Scene) -> Vec3 {
+    fn color(ray: &Ray, scene: Arc<Scene>) -> Vec3 {
         color_rec(ray, scene, 50)
     }
 
-    fn color_rec(ray: &Ray, scene: &Scene, depth: i32) -> Vec3 {
+    fn color_rec(ray: &Ray, scene: Arc<Scene>, depth: i32) -> Vec3 {
         if depth < 0 {
             return na::Vector3::new(0., 0., 0.);
         }
         let mut min_t = f32::MAX;
         let mut min_hit: Option<RayIntersection> = None;
-        let mut min_shape: Option<&Box<dyn Shape>> = None;
+        let mut min_shape: Option<&Arc<dyn Shape>> = None;
         for shape in &scene.shapes {
             let i = shape.hit(ray);
             if let Some(intersection) = i {
@@ -70,7 +90,7 @@ impl Renderer {
         }
     }
     
-    fn render_scanline(y_offset: u32, width: u32, samples: u32, lambda: f32, scene: &Scene, camera: &Camera) -> RgbImage {
+    fn render_scanline(y_offset: u32, width: u32, samples: u32, lambda: f32, scene: Arc<Scene>, camera: Arc<Camera>) -> RgbImage {
         let mut rng = rand::thread_rng();
         let mut image = RgbImage::new(width, 1); 
         for i in 0..width {
@@ -79,7 +99,7 @@ impl Renderer {
                 let u: f32 = i as f32 + rng.gen::<f32>();
                 let v: f32 = y_offset as f32 + rng.gen::<f32>();
                 let ray = camera.ray(u, v);
-                let c = color(&ray, scene);
+                let c = color(&ray, scene.clone());
                 col += c;
             }
 

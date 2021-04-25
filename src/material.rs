@@ -4,7 +4,7 @@ use pa::query::Ray;
 use rand::distributions::{Distribution, Uniform};
 use std::f32::consts::PI;
 
-pub trait Material {
+pub trait Material : Send + Sync{
     fn scatter(&self, ray: &Ray, intersection: &RayIntersection) -> Option<Ray>;
     fn color(&self) -> Vec3;
 }
