@@ -12,6 +12,8 @@ use std::sync::Arc;
 
 extern crate crossbeam;
 use crossbeam_channel::unbounded;
+use crossbeam_deque::{Injector, Steal};
+use num_cpus;
 
 pub struct Renderer {
     pub film: Film,
@@ -23,18 +25,30 @@ impl Renderer {
     pub fn render(&mut self) {
 
         let (s, r) = unbounded();
+
         crossbeam::scope(|scope|{
+            let q = Arc::new(Injector::new());
             for j in 0..self.film.height {
+                q.push(j);
+            }
+
+            for _ in 0..num_cpus::get() {
                 let sender = s.clone();
                 let w = self.film.width;
                 let samples = self.film.samples;
                 let scene = self.scene.clone();
                 let camera = self.camera.clone();
+                let q = q.clone();
                 scope.spawn(move|_|{
-                    let line = render_scanline(j, w, samples, 2.2, scene.clone(), camera.clone());
-                    sender.send((j, line)).unwrap();
+                    let mut job = q.steal();
+                    while let Steal::Success(j) = job {
+                        let line = render_scanline(j.clone(), w, samples, 2.2, scene.clone(), camera.clone());
+                        sender.send((j, line)).unwrap();
+                        job = q.steal();
+                    };
                 });
             }
+
             drop(s);
             for (y, line) in r.iter() {
                 self.film.set_line(&line, y);

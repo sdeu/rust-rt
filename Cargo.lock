@@ -497,8 +497,10 @@ version = "0.1.0"
 dependencies = [
  "crossbeam",
  "crossbeam-channel",
+ "crossbeam-deque",
  "image",
  "nalgebra",
+ "num_cpus",
  "parry3d",
  "progress",
  "rand",

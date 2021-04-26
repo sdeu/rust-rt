@@ -37,8 +37,8 @@ fn main() {
     ];
 
     let scene = Arc::new(scene::Scene { shapes: objects });
-    let width: u32 = 640;
-    let height: u32 = 480;
+    let width: u32 = 1024;
+    let height: u32 = 768;
     let samples = 1000;
     let film = film::Film::new(width, height, samples, Path::new("image.png").to_path_buf());
     let eye = na::Point3::new(0f32, 0f32, 5f32);
