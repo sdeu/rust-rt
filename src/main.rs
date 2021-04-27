@@ -8,8 +8,8 @@ mod renderer;
 mod scene;
 mod shape;
 mod sphere;
-use std::sync::Arc;
 use std::path::Path;
+use std::sync::Arc;
 
 fn main() {
     let objects = vec![
@@ -45,7 +45,10 @@ fn main() {
     let target = na::Point3::new(0f32, 0f32, 0f32);
     let view = na::Isometry3::look_at_rh(&eye, &target, &na::Vector3::y());
     let camera = Arc::new(camera::Camera::new(view.to_matrix(), 3.14 / 2.0, &film));
-    let mut renderer = renderer::Renderer{film: film, camera: camera, scene: scene};
+    let mut renderer = renderer::Renderer {
+        film: film,
+        camera: camera,
+        scene: scene,
+    };
     renderer.render();
-
 }

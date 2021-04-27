@@ -1,4 +1,4 @@
-use image::{RgbImage, GenericImage};
+use image::{GenericImage, RgbImage};
 use std::path::PathBuf;
 
 pub struct Film {
@@ -20,8 +20,7 @@ impl Film {
         }
     }
 
-    pub fn set_line(&mut self, line: &RgbImage, y: u32)
-    {
+    pub fn set_line(&mut self, line: &RgbImage, y: u32) {
         self.image.copy_from(line, 0, y).unwrap();
     }
 

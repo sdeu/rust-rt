@@ -1,6 +1,6 @@
+use super::film::Film;
 use super::math::Matrix4;
 use pa::query::Ray;
-use super::film::Film;
 use std::f32;
 
 pub struct Camera {
@@ -17,16 +17,18 @@ impl Camera {
         let aspect_ratio = film.width as f32 / film.height as f32;
         let perspective = na::Perspective3::new(aspect_ratio, fov, 1f32, 1000.0);
 
-        let screen_to_raster = na::Matrix4::new_nonuniform_scaling(
-                &na::Vector3::new(film.width as f32, film.height as f32, 1f32)) *
-            na::Matrix4::new_nonuniform_scaling(
-                &na::Vector3::new(0.5, 0.5, 1f32)) *
-            na::Matrix4::new_translation(
-                &na::Vector3::new(1., 1., 0f32));
+        let screen_to_raster = na::Matrix4::new_nonuniform_scaling(&na::Vector3::new(
+            film.width as f32,
+            film.height as f32,
+            1f32,
+        )) * na::Matrix4::new_nonuniform_scaling(&na::Vector3::new(
+            0.5, 0.5, 1f32,
+        )) * na::Matrix4::new_translation(&na::Vector3::new(1., 1., 0f32));
 
         let raster_to_screen = screen_to_raster.try_inverse().unwrap();
-        
-        Camera{camera_to_world: camera_to_world,
+
+        Camera {
+            camera_to_world: camera_to_world,
             perspective: perspective,
             fov: fov,
             raster_to_screen: raster_to_screen,
@@ -35,10 +37,14 @@ impl Camera {
     }
 
     pub fn ray(&self, u: f32, v: f32) -> Ray {
-        let far_ndc_point = self.raster_to_screen.transform_point(&na::Point3::new(u, v, 1f32));
+        let far_ndc_point = self
+            .raster_to_screen
+            .transform_point(&na::Point3::new(u, v, 1f32));
         let far_view_point = self.perspective.unproject_point(&far_ndc_point);
         Ray {
-            origin: self.camera_to_world.transform_point(&na::Point3::new(0f32, 0f32, 0f32)),
+            origin: self
+                .camera_to_world
+                .transform_point(&na::Point3::new(0f32, 0f32, 0f32)),
             dir: far_view_point.coords.normalize(),
         }
     }
@@ -49,7 +55,7 @@ mod tests {
     use super::super::film::Film;
     use super::Camera;
     use std::path::Path;
-    
+
     #[test]
     fn test_midpoint_ray() {
         let film = Film::new(100, 100, 1, Path::new("test").to_path_buf());
