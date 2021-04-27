@@ -14,6 +14,7 @@ extern crate crossbeam;
 use crossbeam_channel::unbounded;
 use crossbeam_deque::{Injector, Steal};
 use num_cpus;
+use progress;
 
 pub struct Renderer {
     pub film: Film,
@@ -41,25 +42,31 @@ impl Renderer {
                 let q = q.clone();
                 scope.spawn(move|_|{
                     let mut job = q.steal();
-                    while let Steal::Success(j) = job {
-                        let line = render_scanline(j.clone(), w, samples, 2.2, scene.clone(), camera.clone());
-                        sender.send((j, line)).unwrap();
-                        job = q.steal();
+                    while job != Steal::Empty {
+                        match job {
+                            Steal::Success(j) => {
+                                let line = render_scanline(j.clone(), w, samples, 2.2, scene.clone(), camera.clone());
+                                sender.send((j, line)).unwrap();
+                                job = q.steal();
+                            },
+                            Steal::Retry => job = q.steal(),
+                            Steal::Empty => break
+                        }
                     };
                 });
             }
 
             drop(s);
+
+            let mut bar = progress::Bar::new();
+            bar.set_job_title("Rendering");
+            let mut count = 0;
             for (y, line) in r.iter() {
                 self.film.set_line(&line, y);
+                count += 1;
+                bar.reach_percent((count as f32 / self.film.height as f32 * 100.) as i32);
             };
         }).unwrap();
-        // for j in 0..self.film.height {
-        //     let line = render_scanline(j, self.film.width, self.film.samples, 2.2, &self.scene, &self.camera);
-        //     self.film.set_line(&line, j);
-        //     total += 100.0 / (self.film.height as f32);
-        //     bar.reach_percent(total as i32);
-        // }
         self.film.save();
     }
 }
