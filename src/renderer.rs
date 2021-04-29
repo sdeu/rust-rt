@@ -10,7 +10,6 @@ use rand::Rng;
 use std::f32;
 use std::sync::Arc;
 
-extern crate crossbeam;
 use crossbeam_channel::unbounded;
 use crossbeam_deque::{Injector, Steal};
 use num_cpus;
