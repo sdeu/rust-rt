@@ -22,8 +22,8 @@ impl Camera {
             film.height as f32,
             1f32,
         )) * na::Matrix4::new_nonuniform_scaling(&na::Vector3::new(
-            0.5, 0.5, 1f32,
-        )) * na::Matrix4::new_translation(&na::Vector3::new(1., 1., 0f32));
+            0.5, -0.5, 1f32,
+        )) * na::Matrix4::new_translation(&na::Vector3::new(1., -1., 0f32));
 
         let raster_to_screen = screen_to_raster.try_inverse().unwrap();
 
