@@ -17,10 +17,10 @@ fn main() {
 
     let mut rng = thread_rng();
     let mut positions = vec![Arc::new(na::Vector3::new(0., 0., 0.))];
-    while positions.len() < 40 {
+    while positions.len() < 70 {
         let candidate = Arc::new(na::Vector3::new(
-            rng.gen_range(-10.0..10.0), 
-            rng.gen_range(-2.0..-0.3), 
+            rng.gen_range(-20.0..20.0), 
+            rng.gen_range(0.3..2.0), 
             rng.gen_range(-10.0..10.0)));
         if !positions.iter().any(|v| {
             candidate.metric_distance(v) <= 2.0
@@ -63,7 +63,7 @@ fn main() {
     objects.push(
         Arc::new(sphere::Sphere::new(
             300.,
-            na::Isometry3::translation(1., 300.5, -10.),
+            na::Isometry3::translation(1., -300.5, -10.),
             Arc::new(material::Lambert {
                 color: na::Vector3::new(0.5, 0.5, 0.5),
             }),
@@ -74,8 +74,8 @@ fn main() {
     let height: u32 = 600;
     let samples = 300;
     let film = film::Film::new(width, height, samples, Path::new("image.png").to_path_buf());
-    let eye = na::Point3::new(0f32, 0f32, 12f32);
-    let target = na::Point3::new(0f32, 10f32, 0f32);
+    let eye = na::Point3::new(0f32, 5f32, 15f32);
+    let target = na::Point3::new(0f32, 0f32, 0f32);
     let view = na::Isometry3::look_at_rh(&eye, &target, &na::Vector3::y());
     let camera = Arc::new(camera::Camera::new(view.to_matrix(), 3.14 / 2.0, &film));
     let mut renderer = renderer::Renderer {
