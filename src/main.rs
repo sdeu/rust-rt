@@ -8,6 +8,7 @@ mod renderer;
 mod scene;
 mod shape;
 mod sphere;
+pub mod file;
 use std::path::Path;
 use std::sync::Arc;
 use rand::prelude::*;
