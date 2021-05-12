@@ -21,10 +21,16 @@ impl Film {
     }
 
     pub fn set_line(&mut self, line: &RgbImage, y: u32) {
-        self.image.copy_from(line, 0, y).unwrap();
+        match self.image.copy_from(line, 0, y) {
+            Ok(_) => (),
+            Err(_) => println!("Error storing scanline")
+        }
     }
 
     pub fn save(&self) {
-        self.image.save(self.filename.as_path()).unwrap();
+        match self.image.save(self.filename.as_path()) {
+            Ok(_) => println!("Image save successfuly"),
+            Err(_) => println!("Error saving the image")
+        }
     }
 }
